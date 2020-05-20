@@ -92,13 +92,48 @@ const encode = (input, output) => {
         }
     }
 
-    // console.log('out data', out_data)
+    console.log('out data ', out_data)
     fs.writeFileSync(output, JSON.stringify(out_data));
 }
 
 const decode = (input, output) => {
-    console.log('decode', input, output);
-    throw new Error('not implemented');
+    class Library {
+        constructor(code, letters) {
+            this.code = code;
+            this.letters = letters
+        }
+    }
+
+    console.log(input);
+    var libs = [];
+    const MAX_ASCII = 255;
+
+    for (let i = 0; i <= MAX_ASCII; i++) {
+        const char = String.fromCharCode(i);
+        libs.push(new Library(i, char));
+    }
+
+    let coder = MAX_ASCII + 1;
+    let current = "";
+    let out = "";
+
+    for (let i = 0; i < input.length; i++) {
+        current += libs[input[i]].letters;
+        //console.log("code: " + libs[encode[i]].code + "---current: "+current);
+        out += current;
+        //console.log("------output: "+output);
+
+        let newLib = new Library(coder, current);
+        libs.push(new Library(newLib.code, newLib.letters));
+
+        if (i < encode.length - 1) {
+            libs[coder].letters += libs[encode[i + 1]].letters.charAt(0);
+        }
+        ++coder;
+        current = "";
+    }
+    console.log("out ", out);
+    fs.writeFileSync(output, JSON.stringify(out));
 }
 
 main();
