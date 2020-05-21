@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <undered_map>
 
 int print_file_head_hex() {
     
