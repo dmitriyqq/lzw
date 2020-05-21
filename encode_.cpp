@@ -11,8 +11,6 @@
 
 using namespace std;
 
-
-
 vector<int> encoder(string input)
 {
     unordered_map<string, int> dict;
@@ -38,9 +36,6 @@ vector<int> encoder(string input)
             current = current + next;
         }
         else {
-            //cout << current << "\t" << dict[current] << "\t\t"
-            //    << current + next << "\t" << coder << endl;
-
             // if not found, add current code to output
             output.push_back(dict[current]);
 
@@ -56,14 +51,13 @@ vector<int> encoder(string input)
         // reset next char
         next = "";
     }
-    // cout << current << "\t" << dict[current] << endl;
     // add the last word
     output.push_back(dict[current]);
     return output;
 }
 
 
-string decoder(vector<int> &input)
+string decoder(vector<int>& input)
 {
     struct Library
     {
@@ -114,25 +108,40 @@ string decoder(vector<int> &input)
 
 int main()
 {
-    std::string input = "ABRACADABRACADA";
-    vector<int> output = encoder(input);
-    for (auto o : output) {
-        cout << o << " ";
-    }
-    cout << endl << decoder(output);
-    //ifstream myfile("text.txt");
-    //string input_data;
+    FILE* f;
+    f = fopen("text.txt", "rb");
+    if (f == NULL) cout << "Error opening file";
 
-    //while (getline(myfile, input_data)) {
-    //    cout << input_data;
-    //}
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    rewind(f);
 
-    //vector<int> out = encoder(input_data);
+    char* buffer = (char*)malloc(sizeof(char) * size);
+    fread(buffer, 1, size, f);
+    fclose(f);
 
-    //string after_decode = decoder(out);
+    cout << "Size : " << size;
+    cout << "\n\n";
 
-    //for (auto i : out) cout << i << " ";
-    //cout << "\n-----------------------------\n";
-    //cout << after_decode;
+    vector<int> output = encoder(buffer);
+
+    f = fopen("encoded.bin", "wb");
+    fwrite(&output[0], sizeof(output[0]), output.size(), f);
+    fclose(f);
+
+    /*f = fopen("encoded.bin", "rb");
+    fseek(f, 0, SEEK_END);
+    long size_de = ftell(f);
+    rewind(f);
+
+    cout << "size encoded :" << size_de << endl;
+    int* buffer_de = (int*)malloc(sizeof(int) * size_de);
+    fread(buffer_de, 1, size, f);
+    fclose(f);*/
+
+    string decoded = decoder(output);
+    fwrite(&decoded[0], sizeof(decoded[0]), decoded.size(), f);
+    fclose(f);
+
     return 0;
 }
