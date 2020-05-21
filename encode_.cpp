@@ -58,11 +58,12 @@ vector<int> encoder(string input)
     }
     // cout << current << "\t" << dict[current] << endl;
     // add the last word
+    output.push_back(dict[current]);
     return output;
 }
 
 
-string decoder(vector<int> input)
+string decoder(vector<int> &input)
 {
     struct Library
     {
