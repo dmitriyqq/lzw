@@ -11,6 +11,8 @@
 
 using namespace std;
 
+
+
 vector<int> encoder(string input)
 {
     unordered_map<string, int> dict;
@@ -109,39 +111,56 @@ string decoder(vector<int>& input)
 int main()
 {
     FILE* f;
-    f = fopen("text.txt", "rb");
+    f = fopen("smallText.txt", "rb");
     if (f == NULL) cout << "Error opening file";
 
     fseek(f, 0, SEEK_END);
     long size = ftell(f);
     rewind(f);
 
-    char* buffer = (char*)malloc(sizeof(char) * size);
+    char* buffer = new char[size];
     fread(buffer, 1, size, f);
     fclose(f);
-
+    //cout << buffer;
     cout << "Size : " << size;
     cout << "\n\n";
 
     vector<int> output = encoder(buffer);
+    for (auto o : output) {
+        cout << o << " ";
+    }
 
     f = fopen("encoded.bin", "wb");
     fwrite(&output[0], sizeof(output[0]), output.size(), f);
     fclose(f);
+    /*ofstream writef("encoded.bin", ios::out, ios::binary);
+    writef.write(reinterpret_cast<const char*>(output.data()), output.size() * sizeof(output[0]));
+    writef.close();*/
 
-    /*f = fopen("encoded.bin", "rb");
-    fseek(f, 0, SEEK_END);
-    long size_de = ftell(f);
-    rewind(f);
+    ifstream readf("encoded.bin", ios::in, ios::binary);
+    if (!readf) {
+        cout << "Cannot open file!" << endl;
+        return 1;
+    }
+    readf.seekg(0, readf.end);
+    int length = readf.tellg();
+    cout << "lenth :" << length << endl;
+    readf.seekg(0, readf.beg);
 
-    cout << "size encoded :" << size_de << endl;
-    int* buffer_de = (int*)malloc(sizeof(int) * size_de);
-    fread(buffer_de, 1, size, f);
-    fclose(f);*/
+    vector<int> encoded(length);
+    readf.read(reinterpret_cast<char*>(encoded.data()), length * sizeof(encoded[0]));
+    readf.close();
 
-    string decoded = decoder(output);
+    f = fopen("decoded.txt", "wb");
+    cout << endl << endl;
+    for (auto e : encoded) {
+        cout << e << " ";
+    }
+    string decoded = decoder(encoded);
+    //cout << decoded;
     fwrite(&decoded[0], sizeof(decoded[0]), decoded.size(), f);
     fclose(f);
 
+    delete[] buffer;
     return 0;
 }
