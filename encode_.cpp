@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <fstream>
+#include <algorithm>
 
 #define MAX_ASCII 255
 
@@ -13,9 +14,9 @@ using namespace std;
 
 
 
-vector<int> encoder(string input)
+vector<unsigned short int> encoder(string input)
 {
-    unordered_map<string, int> dict;
+    unordered_map<string, unsigned short int> dict;
     for (int i = 0; i <= 255; i++) {
         string ch = "";
         ch += char(i);
@@ -26,7 +27,7 @@ vector<int> encoder(string input)
     string next = "";
     current += input[0];
     int coder = MAX_ASCII + 1;
-    vector<int> output;
+    vector<unsigned short int> output;
     //cout << "String\tOutput_Code\tAddition\n";
     for (int i = 0; i < input.length(); i++) {
         // check if the last letter
@@ -59,7 +60,7 @@ vector<int> encoder(string input)
 }
 
 
-string decoder(vector<int>& input)
+string decoder(vector<unsigned short int>& input)
 {
     struct Library
     {
@@ -111,7 +112,7 @@ string decoder(vector<int>& input)
 int main()
 {
     FILE* f;
-    f = fopen("smallText.txt", "rb");
+    f = fopen("largeText.txt", "rb");
     if (f == NULL) cout << "Error opening file";
 
     fseek(f, 0, SEEK_END);
@@ -122,13 +123,18 @@ int main()
     fread(buffer, 1, size, f);
     fclose(f);
     //cout << buffer;
-    cout << "Size : " << size;
+    cout << "Number of char in input : " << size;
     cout << "\n\n";
 
-    vector<int> output = encoder(buffer);
-    for (auto o : output) {
-        cout << o << " ";
+    vector<unsigned short int> output = encoder(buffer);
+    auto max = output[0];
+    for (const auto i : output) {
+        if (max >= i) max = i;
     }
+    cout << "Max code = " << max << endl;
+    /*for (auto o : output) {
+        cout << o << " ";
+    }*/
 
     f = fopen("encoded.bin", "wb");
     fwrite(&output[0], sizeof(output[0]), output.size(), f);
@@ -142,20 +148,21 @@ int main()
         cout << "Cannot open file!" << endl;
         return 1;
     }
+
     readf.seekg(0, readf.end);
     int length = readf.tellg();
     cout << "lenth :" << length << endl;
     readf.seekg(0, readf.beg);
 
-    vector<int> encoded(length);
+    vector<unsigned short int> encoded(length);
     readf.read(reinterpret_cast<char*>(encoded.data()), length * sizeof(encoded[0]));
     readf.close();
+    cout << endl << endl;
+    /*for (auto e : encoded) {
+        cout << e << " ";
+    }*/
 
     f = fopen("decoded.txt", "wb");
-    cout << endl << endl;
-    for (auto e : encoded) {
-        cout << e << " ";
-    }
     string decoded = decoder(encoded);
     //cout << decoded;
     fwrite(&decoded[0], sizeof(decoded[0]), decoded.size(), f);
