@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     char *output = argv[3];  
 
     FileManager manager;
-
+    
     if (std::string(op) == "encode") {
         bool result = manager.encode(input, output);
         exit(!result);

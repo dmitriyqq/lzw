@@ -10,7 +10,16 @@ using std::string;
 class Encoder {
     EncoderDictionary dictionary;
     vector<uint32_t> output;
+    size_t data_size;
 public:
+    Encoder(size_t _data_size = 0) : dictionary(data_size), data_size(_data_size) {
+
+    }
+
+    void resetDict() {
+        dictionary.reset(data_size);
+    }
+
     // To Do: don't use vector push back as output use buffer instead
     void encode(const char* const data_ptr, size_t data_size, vector<uint32_t> &output) {
         int current_sequence_start = 0;
@@ -28,5 +37,9 @@ public:
             dictionary.find(data_ptr, current_sequence_start, data_size - current_sequence_start, code);
             output.push_back(code);
         }
+    }
+
+    size_t dictSize() const {
+        return dictionary.size();
     }
 };

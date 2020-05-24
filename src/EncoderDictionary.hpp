@@ -29,7 +29,20 @@ class EncoderDictionary : BaseDictionary {
     }
 
 public:
-    EncoderDictionary() {
+    EncoderDictionary(size_t exprected_capacity = 0) {
+        if (exprected_capacity) {
+            // m_data.reserve(exprected_capacity);
+            // m_dict.reserve(exprected_capacity);
+        }
+
+        initializeDictionary();
+    }
+
+    void reset(size_t exprected_capacity ) {
+        m_dict.clear();
+        // m_dict.reserve(exprected_capacity);
+        m_data.clear();
+        // m_data.reserve(exprected_capacity);
         initializeDictionary();
     }
 

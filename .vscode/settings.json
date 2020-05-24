@@ -42,7 +42,19 @@
         "xstddef": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "chrono": "cpp",
+        "algorithm": "cpp",
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "ctime": "cpp",
+        "iomanip": "cpp",
+        "locale": "cpp",
+        "ratio": "cpp",
+        "xlocbuf": "cpp",
+        "xlocmes": "cpp",
+        "xlocmon": "cpp",
+        "xloctime": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

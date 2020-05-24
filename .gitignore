@@ -3,3 +3,4 @@
 samples/
 *.exe
 build/
+release/
