@@ -10,7 +10,6 @@
 
 class BlockMetadata {
     uint8_t numberOfBits;
-    uint32_t blockNumber;
 };
 
 class Packager {
@@ -34,7 +33,7 @@ public:
         }
     }
 
-    bool writeBits(const vector<uint32_t> &in, vector<uint32_t> &out, char numberOfBits, uint32_t blockNumber) {
+    bool writeBits(const vector<uint32_t> &in, vector<uint32_t> &out) {
         uint32_t number = 0;
         uint32_t a = 0, b = 0;
         char usedBits = 0;
@@ -49,7 +48,11 @@ public:
                 // we have 4 bytes ready to write then move b -> a
                 out.push_back(a);
                 a = b;
+                b = 0;
             }
+        }
+        if (a != 0) {
+            out.push_back(a);
         }
     }
 };

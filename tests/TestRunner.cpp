@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <iostream>
+#include <bitset>
 
 #include "../src/EncoderDictionary.hpp"
 #include "../src/Encoder.hpp"
@@ -251,6 +252,35 @@ TEST write_to_bits_test3(void) {
     PASS();
 }
 
+TEST write_bits_test1(void) {
+    Packager packager(23);
+    uint32_t x1 = 1231232, x2 = 3343, x3 = 343454, x4 = 32111;
+
+    std::vector<uint32_t> in = { x1, x2, x3, x4};
+    std::vector<uint32_t> out;
+
+    packager.writeBits(in, out);
+    
+    // out[0] |  9 bits of x2 |        23 bits of x1        |
+    // out[1] |      18 bits of x3      |   14 bits of x2   |
+    // out[2] | 4 free bits | 23 bits of x4 |  5 bits of x3 |
+
+    ASSERT_EQ(3, out.size());
+    ASSERT_EQ(x1 | x2 << 23, out[0]);
+    ASSERT_EQ((x2 >> 9) | (x3 << 14), out[1]);
+    ASSERT_EQ(x3 >> 18 | x4 << 5, out[2]);
+
+    PASS();
+}
+
+TEST write_bits_test2(void) {
+    PASS();
+}
+
+TEST write_bits_test3(void) {
+    PASS();
+}
+
 /* Suites can group multiple tests with common setup. */
 SUITE(DictionaryTests) {
     RUN_TEST(dictionary_should_be_initialized);
@@ -282,6 +312,12 @@ SUITE(WriteToIntsTests) {
     RUN_TEST(write_to_bits_test3);
 }
 
+SUITE(WriteBitsTests) {
+    RUN_TEST(write_bits_test1);
+    RUN_TEST(write_bits_test2);
+    RUN_TEST(write_bits_test3);
+}
+
 /* Add definitions that need to be in the test runner's main file. */
 GREATEST_MAIN_DEFS();
 
@@ -294,6 +330,7 @@ int main(int argc, char **argv) {
     RUN_SUITE(DecoderTests);
     RUN_SUITE(FileManagerTests);
     RUN_SUITE(WriteToIntsTests);
+    RUN_SUITE(WriteBitsTests);
 
     GREATEST_MAIN_END();        /* display results */
 }
