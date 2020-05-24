@@ -11,40 +11,48 @@
 class BlockMetadata {
     uint8_t numberOfBits;
     uint32_t blockNumber;
-}
+};
 
 class Packager {
     char numberOfBits;
-    constexpr char bitsInInt = 32;
+    static constexpr char bitsInInt = 32;
+public:
+    Packager(char _numberOfBits) : numberOfBits(_numberOfBits) {
+    }
 
     void writeToInt(uint32_t &a, uint32_t &b, uint32_t x, char &usedBits) {
         if (usedBits + numberOfBits <= bitsInInt) {
             // can safely write x to a;
+            a |= x << usedBits; 
             usedBits += numberOfBits;
-            a |= x << numberOfBits; 
         } else {
             // we can't write whole x, we need to split it between a and b
             char bitsAvailable = bitsInInt - usedBits;
             a |= x << usedBits;
             b |= x >> bitsAvailable;
-            usedBits = bitsInInt - numberOfBits + bitsAvailable;
+            usedBits = numberOfBits - bitsAvailable;
         }
     }
 
-public:
-    Packager(char _numberOfBits) : numberOfBits(_numberOfBits) {
-    }
-
-    bool writeBits(const vector<uint32_t> &in, const vector<uint32_t> &out, char numberOfBits, uint32_t blockNumber) {
+    bool writeBits(const vector<uint32_t> &in, vector<uint32_t> &out, char numberOfBits, uint32_t blockNumber) {
         uint32_t number = 0;
         uint32_t a = 0, b = 0;
-        char usedBits = 
+        char usedBits = 0;
 
         for (const uint32_t &x: in) {
-            writeToInt(a, b, x, usedBits)
+            writeToInt(a, b, x, usedBits);
+            if (usedBits == 32) {
+                // we have whole 4 bytes to write then reset everything
+                out.push_back(a);
+                a = b = usedBits = 0;
+            } else if (b != 0) {
+                // we have 4 bytes ready to write then move b -> a
+                out.push_back(a);
+                a = b;
+            }
         }
     }
-}
+};
 
 class FileManager {
     static constexpr uint32_t READ_BLOCK_SIZE = 1 << 16;
@@ -59,7 +67,6 @@ public:
         }
 
         Encoder encoder;
-        Packager packager;
         uintmax_t read = 0;
         uint32_t number_of_blocks = 0;
 
