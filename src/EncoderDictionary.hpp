@@ -7,16 +7,14 @@
 #include <climits>
 #include <iostream>
 
-class EncoderDictionary {
+#include "BaseDictionary.hpp"
+
+class EncoderDictionary : BaseDictionary {
     std::unordered_map<std::string_view, uint32_t> m_dict;
     std::vector<std::string> m_data;
 
-    void initializeDictionary() {
-        for (int i = 0; i <= UCHAR_MAX; i++) {
-            std::string ch = "";
-            ch += (unsigned char)i;
-            insert(ch);
-        }
+    void insert(char c, uint32_t code) override {
+        insert(std::string(1, c));
     }
 
     void insert(const std::string_view &view) {

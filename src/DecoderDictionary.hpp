@@ -6,57 +6,33 @@
 #include <vector>
 #include <climits>
 #include <iostream>
+#include "BaseDictionary.hpp"
 
-class EncoderDictionary {
-    std::unordered_map<std::string_view, uint32_t> m_dict;
+class DecoderDictionary : public BaseDictionary {
     std::vector<std::string> m_data;
 
-    void initializeDictionary() {
-        for (int i = 0; i <= UCHAR_MAX; i++) {
-            std::string ch = "";
-            ch += (unsigned char)i;
-            insert(ch);
-        }
-    }
 
-    void insert(const std::string_view &view) {
-        m_data.emplace_back(view);
-        std::string_view view_data(m_data.back());
-        m_dict[view_data] = m_dict.size();
+    void insert(char c, uint32_t i) override {
+        insert(std::string(1, c));
     }
-
-    inline std::string_view createStringView(const char* data_ptr, int substr_start, int substr_len) const {
-        const char* str_start_ptr = data_ptr + substr_start;
-        return std::string_view(str_start_ptr, substr_len);
-    }
-
 public:
-    EncoderDictionary() {
+    DecoderDictionary() {
         initializeDictionary();
     }
-
-    bool findOrInsert(const char* data_ptr, int substr_start, int substr_len, uint32_t &code) {
-        std::string_view sequence = createStringView(data_ptr, substr_start, substr_len);
-        
-        if (m_dict.find(sequence) != m_dict.end()) {
-            return false;
-        } else {
-            // if not found we must add it to dictionary
-            insert(sequence);
-            // now return code of previous string
-            std::string_view prev_sequence = createStringView(data_ptr, substr_start, substr_len - 1);
-            code = m_dict[prev_sequence];
-            return true;
-        }
+    
+    void insert(const std::string &str) {
+        m_data.emplace_back(str);
     }
 
-    bool find(const char* data_ptr, int substr_start, int substr_len, uint32_t &code) {
-        std::string_view sequence = createStringView(data_ptr, substr_start, substr_len);
-        code = m_dict[sequence];
-        return true;
+    void update(uint32_t code, char c) {
+        m_data[code] += c;
+    }
+
+    const std::string get(uint32_t code) {
+        return m_data[code];
     }
 
     size_t size() const {
-        return m_dict.size();
+        return m_data.size();
     }
 };
