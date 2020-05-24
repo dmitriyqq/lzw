@@ -8,13 +8,9 @@
 #include "Encoder.hpp"
 #include "Decoder.hpp"
 
-class BlockMetadata {
-    uint8_t numberOfBits;
-};
-
 class Packager {
     char numberOfBits;
-    static constexpr char bitsInInt = 32;
+    static constexpr uint8_t bitsInInt = 32;
 public:
     Packager(char _numberOfBits) : numberOfBits(_numberOfBits) {
     }
@@ -33,7 +29,7 @@ public:
         }
     }
 
-    bool writeBits(const vector<uint32_t> &in, vector<uint32_t> &out) {
+    void writeBits(const vector<uint32_t> &in, vector<uint32_t> &out) {
         uint32_t number = 0;
         uint32_t a = 0, b = 0;
         char usedBits = 0;
@@ -58,14 +54,16 @@ public:
 };
 
 class FileManager {
-    static constexpr uint32_t READ_BLOCK_SIZE = 1 << 16;
+    static constexpr uint32_t BLOCK_SIZE = 1 << 10;
+    char buffer[BLOCK_SIZE];
 public:
     bool encode(std::string input_path, std::string output_path) {
         auto file_size = std::filesystem::file_size(input_path);
         std::cout << "input file size: " << file_size << " bytes" << std::endl;
 
-        std::ifstream in(input_path);
-        if (!in) {
+        std::ifstream in_file(input_path, std::ios_base::binary);
+        std::ofstream out_file(output_path, std::ios_base::binary);
+        if (!in_file || !out_file) {
             return false;
         }
 
@@ -73,34 +71,60 @@ public:
         uintmax_t read = 0;
         uint32_t number_of_blocks = 0;
 
+        // leave 4 bytes at the beggining of the file to count number of blocks;
+        out_file.write((char*)&number_of_blocks, 4);
+        out_file.write((char*)&BLOCK_SIZE, 4);
+
         while (read != file_size) {
             number_of_blocks++;
-            char buffer[READ_BLOCK_SIZE];
+            // std::cout << "BLOCK_NUMBER: " << number_of_blocks << std::endl;
 
-            uint32_t to_read = (read + READ_BLOCK_SIZE) < file_size ? READ_BLOCK_SIZE : file_size - read;
+            uint32_t to_read = (read + BLOCK_SIZE) < file_size ? BLOCK_SIZE : file_size - read;
 
-            in.read(buffer, to_read);
+            // std::cout << "to read " << to_read << std::endl;
 
-            std::vector<uint32_t> out;
-            encoder.encode(buffer, to_read, out);
+            in_file.read(buffer, to_read);
+            read += to_read;
+
+            // std::cout << "READ" << std::endl;
+
+            std::vector<uint32_t> coded;
+            encoder.encode(buffer, to_read, coded);
+
+            // std::cout << "ENCODED" << std::endl;
+
             uint32_t max_code = 0;
-            for (const uint32_t &code: out) {
+            for (const uint32_t &code: coded) {
                 max_code = std::max(max_code, code);
             }
 
-            char number_of_bits = 8;
-            uint32_t code = 255;
+            // std::cout << "MAX_CODE" << max_code << std::endl;
+
+            char number_of_bits = CHAR_BIT;
+            uint32_t code = UCHAR_MAX;
             while (code < max_code) { 
-                code << 1;
+                code <<= 1;
                 number_of_bits++; 
             }
 
+            // std::cout << "NUMBER_OF_BITS " << (int)number_of_bits << std::endl;
+
+            Packager packager(number_of_bits);
+            std::vector<uint32_t> out;
+            packager.writeBits(coded, out);
+            out_file.write(&number_of_bits, 1);
+            out_file.write((char*)&out[0], out.size() * sizeof(out[0]));
         }
 
-        in.close();
+        out_file.seekp(0, std::ios::beg);
+        // rewrite number of blocks
+        out_file.write((char*)&number_of_blocks, 4);
+        out_file.close();
+        in_file.close();
+        return true;
     }
 
     bool decode(std::string input_path, std::string output_path) {
-
+        return true;
     }
 };
