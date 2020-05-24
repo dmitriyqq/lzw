@@ -2,13 +2,13 @@
 
 #include <vector>
 #include <string>
-#include "Dictionary.hpp"
+#include "EncoderDictionary.hpp"
 
 using std::vector;
 using std::string;
 
 class Encoder {
-    Dictionary dictionary;
+    EncoderDictionary dictionary;
     vector<uint32_t> output;
 public:
     void encode(const char* const data_ptr, size_t data_size, vector<uint32_t> &output) {

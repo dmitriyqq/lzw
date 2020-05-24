@@ -1,10 +1,11 @@
 #include "greatest.h"
 #include "stdio.h"
-#include "../src/Dictionary.hpp"
+#include "../src/EncoderDictionary.hpp"
 #include "../src/Encoder.hpp"
+#include "../src/Decoder.hpp"
 
 TEST dictionary_should_be_initialized(void) {
-    Dictionary dictionary;
+    EncoderDictionary dictionary;
 
     const char* data_ptr = "abc";
     uint32_t code;
@@ -33,7 +34,7 @@ TEST dictionary_should_be_initialized(void) {
 }
 
 TEST dictionary_should_add_new_sequence(void) {
-    Dictionary dictionary;
+    EncoderDictionary dictionary;
 
     const char* data_ptr = "abc";
     uint32_t code;
@@ -62,7 +63,7 @@ TEST dictionary_should_add_new_sequence(void) {
 }
 
 TEST dictionary_shoud_return_code_and_dont_add(void) {
-    Dictionary dictionary;
+    EncoderDictionary dictionary;
 
     const char* data_ptr = "zxzxczxcdzx";
     uint32_t code;
@@ -123,6 +124,32 @@ TEST encode_seq3(void) {
     PASS();
 }
 
+// std::string vec2str(const vector<char> v) {
+//     std::string str;
+//     for (const char &c: v){
+//         str += c;
+//     }
+//     return str;
+// }
+
+TEST decode_seq1(void) {
+
+    const int data[] = {'n', 'm', 'g', 257, 'h', 256, 258, 259};
+    std::string out;
+    Decoder decoder;
+    decoder.decode(data, 8, out);
+    ASSERT_EQ("nmgmghnmgmmgh", out);
+    PASS();
+}
+
+TEST decode_seq2(void) {
+    PASS();
+}
+
+TEST decode_seq3(void) {
+    PASS();
+}
+
 /* Suites can group multiple tests with common setup. */
 SUITE(DictionaryTests) {
     RUN_TEST(dictionary_should_be_initialized);
@@ -136,6 +163,11 @@ SUITE(EncoderTests) {
     RUN_TEST(encode_seq3);
 }
 
+SUITE(DecoderTests) {
+    RUN_TEST(decode_seq1);
+    RUN_TEST(decode_seq2);
+    RUN_TEST(decode_seq3);
+}
 
 /* Add definitions that need to be in the test runner's main file. */
 GREATEST_MAIN_DEFS();
@@ -146,6 +178,7 @@ int main(int argc, char **argv) {
     /* Tests can also be gathered into test suites. */
     RUN_SUITE(DictionaryTests);
     RUN_SUITE(EncoderTests);
+    RUN_SUITE(DecoderTests);
 
     GREATEST_MAIN_END();        /* display results */
 }

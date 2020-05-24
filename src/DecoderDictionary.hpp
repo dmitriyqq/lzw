@@ -7,7 +7,7 @@
 #include <climits>
 #include <iostream>
 
-class Dictionary {
+class EncoderDictionary {
     std::unordered_map<std::string_view, uint32_t> m_dict;
     std::vector<std::string> m_data;
 
@@ -29,8 +29,9 @@ class Dictionary {
         const char* str_start_ptr = data_ptr + substr_start;
         return std::string_view(str_start_ptr, substr_len);
     }
+
 public:
-    Dictionary() {
+    EncoderDictionary() {
         initializeDictionary();
     }
 
