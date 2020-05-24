@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include <climits>
+#include <iostream>
 
 class Dictionary {
     std::unordered_map<std::string_view, uint32_t> m_dict;

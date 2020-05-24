@@ -11,11 +11,12 @@ class Encoder {
     Dictionary dictionary;
     vector<uint32_t> output;
 public:
-    void encode(char *data_ptr, size_t data_size, vector<uint32_t> &output) {
+    void encode(const char* const data_ptr, size_t data_size, vector<uint32_t> &output) {
         int current_sequence_start = 0;
         uint32_t code;
-        for (int i = 0; i < data_size; i++) {
+        for (int i = 1; i < data_size; i++) {
             if (dictionary.findOrInsert(data_ptr, current_sequence_start, i - current_sequence_start, code)) {
+                i--;
                 current_sequence_start = i;
                 output.push_back(code);
             } 

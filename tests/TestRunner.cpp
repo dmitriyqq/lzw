@@ -1,6 +1,7 @@
 #include "greatest.h"
 #include "stdio.h"
 #include "../src/Dictionary.hpp"
+#include "../src/Encoder.hpp"
 
 TEST dictionary_should_be_initialized(void) {
     Dictionary dictionary;
@@ -13,15 +14,18 @@ TEST dictionary_should_be_initialized(void) {
 
     result = dictionary.findOrInsert(data_ptr, 0, 1, code);
     ASSERT_FALSE(result);
-    ASSERT_EQ(0, code);
+    dictionary.find(data_ptr, 0, 1, code);
+    ASSERT_EQ('a', code);
 
     result = dictionary.findOrInsert(data_ptr, 1, 1, code);
     ASSERT_FALSE(result);
-    ASSERT_EQ(2, code);
+    dictionary.find(data_ptr, 1, 1, code);
+    ASSERT_EQ('b', code);
 
     result = dictionary.findOrInsert(data_ptr, 2, 1, code);
     ASSERT_FALSE(result);
-    ASSERT_EQ(1, code);
+    dictionary.find(data_ptr, 2, 1, code);
+    ASSERT_EQ('c', code);
 
     ASSERT_EQm("sizes are not equal", size_before, dictionary.size());
 
@@ -29,25 +33,93 @@ TEST dictionary_should_be_initialized(void) {
 }
 
 TEST dictionary_should_add_new_sequence(void) {
-    int x = 1;
-    /* Compare, with an automatic "1 != x" failure message */
-    ASSERT_EQ(1, x);
+    Dictionary dictionary;
 
-    /* Compare, with a custom failure message */
-    ASSERT_EQm("Yikes, x doesn't equal 1", 1, x);
+    const char* data_ptr = "abc";
+    uint32_t code;
+    bool result;
 
-    /* Compare, and if they differ, print both values,
-     * formatted like `printf("Expected: %d\nGot: %d\n", 1, x);` */
-    ASSERT_EQ_FMT(1, x, "%d");
-    
+    size_t size_before = dictionary.size();
+
+    result = dictionary.findOrInsert(data_ptr, 0, 2, code);
+    ASSERT(result);
+    ASSERT_EQ('a', code);
+
+    uint32_t inserted_code;
+    result = dictionary.find(data_ptr, 0, 2, inserted_code);
+    ASSERT(result);
+
+    result = dictionary.findOrInsert(data_ptr, 0, 3, code);
+    ASSERT(result);
+    ASSERT_EQ(inserted_code, code);
+
+    result = dictionary.findOrInsert(data_ptr, 1, 2, code);
+    ASSERT(result);
+    ASSERT_EQ('b', code);
+
+    ASSERT_EQm("3 items should be added", size_before + 3, dictionary.size());
     PASS();
 }
 
 TEST dictionary_shoud_return_code_and_dont_add(void) {
+    Dictionary dictionary;
+
+    const char* data_ptr = "zxzxczxcdzx";
+    uint32_t code;
+    bool result;
+    size_t size_before = dictionary.size();
+
+    result = dictionary.findOrInsert(data_ptr, 0, 1, code);
+    ASSERT_FALSE(result);
+    result = dictionary.findOrInsert(data_ptr, 0, 2, code);
+    ASSERT(result);
+
+    result = dictionary.findOrInsert(data_ptr, 2, 1, code);
+    ASSERT_FALSE(result);
+    result = dictionary.findOrInsert(data_ptr, 2, 2, code);
+    ASSERT_FALSE(result);
+    result = dictionary.findOrInsert(data_ptr, 2, 3, code);
+    ASSERT(result);
+
+    result = dictionary.findOrInsert(data_ptr, 5, 1, code);
+    ASSERT_FALSE(result);
+    result = dictionary.findOrInsert(data_ptr, 5, 2, code);
+    ASSERT_FALSE(result);
+    result = dictionary.findOrInsert(data_ptr, 5, 3, code);
+    ASSERT_FALSE(result);
+    result = dictionary.findOrInsert(data_ptr, 5, 4, code);
+    ASSERT(result);
+
+    ASSERT_EQm("3 items should be added", size_before + 3, dictionary.size());
+
     PASS();
 }
 
-TEST dictionary_should_find(void) {
+TEST encode_seq1(void) {
+    Encoder encoder;
+
+    const char *data = "nmgmghnmgmmgh";
+    std::vector<uint32_t> out;
+
+    encoder.encode(data, strlen(data), out);
+    ASSERT_EQ(8, out.size());
+    ASSERT_EQ('n', out[0]);
+    ASSERT_EQ('m', out[1]);
+    ASSERT_EQ('g', out[2]);
+    ASSERT_EQ(257, out[3]); // mg
+    ASSERT_EQ('h', out[4]); 
+    ASSERT_EQ(256, out[5]); // nm
+    ASSERT_EQ(258, out[6]); 
+    ASSERT_EQ(259, out[7]); // mgh
+
+    PASS();
+}
+
+TEST encode_seq2(void) {
+    PASS();
+}
+
+TEST encode_seq3(void) {
     PASS();
 }
 
@@ -56,14 +128,12 @@ SUITE(DictionaryTests) {
     RUN_TEST(dictionary_should_be_initialized);
     RUN_TEST(dictionary_should_add_new_sequence);
     RUN_TEST(dictionary_shoud_return_code_and_dont_add);
-    RUN_TEST(dictionary_should_find);
 }
 
 SUITE(EncoderTests) {
-    RUN_TEST(dictionary_should_be_initialized);
-    RUN_TEST(dictionary_should_add_new_sequence);
-    RUN_TEST(dictionary_shoud_return_code_and_dont_add);
-    RUN_TEST(dictionary_should_find);
+    RUN_TEST(encode_seq1);
+    RUN_TEST(encode_seq2);
+    RUN_TEST(encode_seq3);
 }
 
 
