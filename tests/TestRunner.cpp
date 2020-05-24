@@ -1,8 +1,12 @@
 #include "greatest.h"
-#include "stdio.h"
+#include <cstdio>
+#include <filesystem>
+#include <iostream>
+
 #include "../src/EncoderDictionary.hpp"
 #include "../src/Encoder.hpp"
 #include "../src/Decoder.hpp"
+#include "../src/FileManager.hpp"
 
 TEST dictionary_should_be_initialized(void) {
     EncoderDictionary dictionary;
@@ -124,14 +128,6 @@ TEST encode_seq3(void) {
     PASS();
 }
 
-// std::string vec2str(const vector<char> v) {
-//     std::string str;
-//     for (const char &c: v){
-//         str += c;
-//     }
-//     return str;
-// }
-
 TEST decode_seq1(void) {
 
     const int data[] = {'n', 'm', 'g', 257, 'h', 256, 258, 259};
@@ -147,6 +143,72 @@ TEST decode_seq2(void) {
 }
 
 TEST decode_seq3(void) {
+    PASS();
+}
+
+char * readFileToBuffer(const std::string &input_path) {
+    auto input_size = std::filesystem::file_size(input_path);
+    char *buf = new char[input_size];
+    std::ifstream in(input_path);
+    in.read(buf, input_size);
+    in.close();
+    return buf;
+}
+
+bool equals(const char* buf1, const char* buf2, int size) {
+    for (int i = 0; i < size; i++) {
+        if (buf1[i] != buf2[i] ) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool testFile(const std::string &input_path) {
+    try {
+        std::filesystem::remove("compressed");
+        std::filesystem::remove("out");
+
+        FileManager manager;
+
+        manager.encode(input_path, "compressed");
+        manager.decode("compressed", "out");
+
+        auto input_size = std::filesystem::file_size(input_path);
+        auto out_size = std::filesystem::file_size("out");
+
+        if (input_size != out_size) {
+            return false;
+        }
+
+        char *in = readFileToBuffer(input_path);
+        char *out = readFileToBuffer("out");
+        
+        PASS();
+
+        delete[] in;
+        delete[] out;
+
+        return equals(in, out, input_size);
+    } catch (std::exception e){
+        std::cout << e.what() << std::endl;
+        return false;
+    }
+}
+
+TEST file_test_en(void) {
+    ASSERT(testFile("in_en.txt"));
+    PASS();
+}
+
+TEST file_test_rus(void) {
+    ASSERT(testFile("in_rus.txt"));
+    PASS();
+}
+
+TEST file_test_binary(void) {
+    ASSERT(testFile("in_binary"));
     PASS();
 }
 
@@ -169,6 +231,12 @@ SUITE(DecoderTests) {
     RUN_TEST(decode_seq3);
 }
 
+SUITE(FileManagerTests) {
+    RUN_TEST(file_test_en);
+    RUN_TEST(file_test_rus);
+    RUN_TEST(file_test_binary);
+}
+
 /* Add definitions that need to be in the test runner's main file. */
 GREATEST_MAIN_DEFS();
 
@@ -179,6 +247,7 @@ int main(int argc, char **argv) {
     RUN_SUITE(DictionaryTests);
     RUN_SUITE(EncoderTests);
     RUN_SUITE(DecoderTests);
+    RUN_SUITE(FileManagerTests);
 
     GREATEST_MAIN_END();        /* display results */
 }

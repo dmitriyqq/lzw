@@ -11,6 +11,7 @@ class Encoder {
     EncoderDictionary dictionary;
     vector<uint32_t> output;
 public:
+    // To Do: don't use vector push back as output use buffer instead
     void encode(const char* const data_ptr, size_t data_size, vector<uint32_t> &output) {
         int current_sequence_start = 0;
         uint32_t code;

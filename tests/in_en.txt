@@ -1,0 +1,10 @@
+Read block of data
+Extracts n characters from the stream and stores them in the array pointed to by s.
+
+This function simply copies a block of data, without checking its contents nor appending a null character at the end.
+
+If the input sequence runs out of characters to extract (i.e., the end-of-file is reached) before n characters have been successfully read, the array pointed to by s contains all the characters read until that point, and both the eofbit and failbit flags are set for the stream.
+
+Internally, the function accesses the input sequence by first constructing a sentry object (with noskipws set to true). Then (if good), it extracts characters from its associated stream buffer object as if calling its member functions sbumpc or sgetc, and finally destroys the sentry object before returning.
+
+The number of characters successfully read and stored by this function can be accessed by calling member gcount.

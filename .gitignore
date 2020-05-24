@@ -1,4 +1,5 @@
 *.txt
+!tests/*.txt
 samples/
 *.exe
 build/
