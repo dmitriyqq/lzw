@@ -121,6 +121,12 @@ public:
         out_file.write((char*)&number_of_blocks, 4);
         out_file.close();
         in_file.close();
+
+        auto out_file_size = std::filesystem::file_size(output_path);
+
+        std::cout << "out file size: " << out_file_size << std::endl;
+        std::cout << "data compression ratio: " << ((double) file_size / (double) out_file_size) << std::endl;
+
         return true;
     }
 
