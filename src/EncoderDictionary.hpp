@@ -9,65 +9,84 @@
 
 #include "BaseDictionary.hpp"
 
+#include <iostream>
+#include <unordered_map>
+
+class Trie
+{
+public:
+    uint32_t code;
+    std::unordered_map<char, Trie*> map;
+    Trie(uint32_t _code): code(_code) {}
+    ~Trie() {
+        for(const auto &kv: map) {
+            delete kv.second;
+        }
+    } 
+};
+
+
 class EncoderDictionary : BaseDictionary {
-    std::unordered_map<std::string_view, uint32_t> m_dict;
-    std::vector<std::string> m_data;
+    Trie *m_trie = nullptr;
+    uint32_t m_size = 0;
 
     void insert(char c, uint32_t code) override {
-        insert(std::string(1, c));
+        char* pc = &c;
+        insertNewCode(pc, 1);
     }
-
-    void insert(const std::string_view &view) {
-        m_data.emplace_back(view);
-        std::string_view view_data(m_data.back());
-        m_dict[view_data] = m_dict.size();
-    }
-
-    inline std::string_view createStringView(const char* data_ptr, int substr_start, int substr_len) const {
-        const char* str_start_ptr = data_ptr + substr_start;
-        return std::string_view(str_start_ptr, substr_len);
-    }
-
 public:
-    EncoderDictionary(size_t exprected_capacity = 0) {
-        if (exprected_capacity) {
-            // m_data.reserve(exprected_capacity);
-            // m_dict.reserve(exprected_capacity);
-        }
-
+    EncoderDictionary() {
         initializeDictionary();
     }
 
-    void reset(size_t exprected_capacity ) {
-        m_dict.clear();
-        // m_dict.reserve(exprected_capacity);
-        m_data.clear();
-        // m_data.reserve(exprected_capacity);
+    void reset() {
+        delete m_trie;
         initializeDictionary();
     }
 
-    bool findOrInsert(const char* data_ptr, int substr_start, int substr_len, uint32_t &code) {
-        std::string_view sequence = createStringView(data_ptr, substr_start, substr_len);
-        
-        if (m_dict.find(sequence) != m_dict.end()) {
-            return false;
-        } else {
-            // if not found we must add it to dictionary
-            insert(sequence);
-            // now return code of previous string
-            std::string_view prev_sequence = createStringView(data_ptr, substr_start, substr_len - 1);
-            code = m_dict[prev_sequence];
-            return true;
+    uint32_t insertNewCode(char*& str, size_t len)
+    {
+        if (m_trie == nullptr) {
+            // code don't matter here since we add all characters in initialization
+            m_trie = new Trie(0);
         }
-    }
 
-    bool find(const char* data_ptr, int substr_start, int substr_len, uint32_t &code) {
-        std::string_view sequence = createStringView(data_ptr, substr_start, substr_len);
-        code = m_dict[sequence];
-        return true;
+        // start from root node
+        Trie* current_node = m_trie;
+        size_t idx = 0;
+
+        while (idx < len)
+        {
+            char c = str[idx];
+            if (current_node->map.find(c) == current_node->map.end())  {
+                // we found place where sequence don't exists in trie
+                // add it with new code; 
+                // std::cout << "adding new code " << std::string_view(str, idx) << " " << m_size + 1 << std::endl;
+
+                current_node->map[c] = new Trie(m_size++);
+                // move ptr
+                str += idx;
+                // return old code
+                return current_node->code;
+            }
+
+            // node exists in trie, go to next node
+            current_node = current_node->map[c];
+
+            // move to next character
+            idx++;
+        }
+
+        str += idx;
+        // mark current node as leaf
+        return current_node->code;
     }
 
     size_t size() const {
-        return m_dict.size();
+        return m_size;
+    }
+
+    ~EncoderDictionary() {
+        delete m_trie;
     }
 };

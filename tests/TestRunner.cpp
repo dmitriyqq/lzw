@@ -9,97 +9,97 @@
 #include "../src/Decoder.hpp"
 #include "../src/FileManager.hpp"
 
-TEST dictionary_should_be_initialized(void) {
-    EncoderDictionary dictionary;
+// TEST dictionary_should_be_initialized(void) {
+//     EncoderDictionary dictionary;
 
-    const char* data_ptr = "abc";
-    uint32_t code;
-    bool result;
+//     const char* data_ptr = "abc";
+//     uint32_t code;
+//     bool result;
 
-    size_t size_before = dictionary.size();
+//     size_t size_before = dictionary.size();
 
-    result = dictionary.findOrInsert(data_ptr, 0, 1, code);
-    ASSERT_FALSE(result);
-    dictionary.find(data_ptr, 0, 1, code);
-    ASSERT_EQ('a', code);
+//     result = dictionary.findOrInsert(data_ptr, 0, 1, code);
+//     ASSERT_FALSE(result);
+//     dictionary.find(data_ptr, 0, 1, code);
+//     ASSERT_EQ('a', code);
 
-    result = dictionary.findOrInsert(data_ptr, 1, 1, code);
-    ASSERT_FALSE(result);
-    dictionary.find(data_ptr, 1, 1, code);
-    ASSERT_EQ('b', code);
+//     result = dictionary.findOrInsert(data_ptr, 1, 1, code);
+//     ASSERT_FALSE(result);
+//     dictionary.find(data_ptr, 1, 1, code);
+//     ASSERT_EQ('b', code);
 
-    result = dictionary.findOrInsert(data_ptr, 2, 1, code);
-    ASSERT_FALSE(result);
-    dictionary.find(data_ptr, 2, 1, code);
-    ASSERT_EQ('c', code);
+//     result = dictionary.findOrInsert(data_ptr, 2, 1, code);
+//     ASSERT_FALSE(result);
+//     dictionary.find(data_ptr, 2, 1, code);
+//     ASSERT_EQ('c', code);
 
-    ASSERT_EQm("sizes are not equal", size_before, dictionary.size());
+//     ASSERT_EQm("sizes are not equal", size_before, dictionary.size());
 
-    PASS();
-}
+//     PASS();
+// }
 
-TEST dictionary_should_add_new_sequence(void) {
-    EncoderDictionary dictionary;
+// TEST dictionary_should_add_new_sequence(void) {
+//     EncoderDictionary dictionary;
 
-    const char* data_ptr = "abc";
-    uint32_t code;
-    bool result;
+//     const char* data_ptr = "abc";
+//     uint32_t code;
+//     bool result;
 
-    size_t size_before = dictionary.size();
+//     size_t size_before = dictionary.size();
 
-    result = dictionary.findOrInsert(data_ptr, 0, 2, code);
-    ASSERT(result);
-    ASSERT_EQ('a', code);
+//     result = dictionary.findOrInsert(data_ptr, 0, 2, code);
+//     ASSERT(result);
+//     ASSERT_EQ('a', code);
 
-    uint32_t inserted_code;
-    result = dictionary.find(data_ptr, 0, 2, inserted_code);
-    ASSERT(result);
+//     uint32_t inserted_code;
+//     result = dictionary.find(data_ptr, 0, 2, inserted_code);
+//     ASSERT(result);
 
-    result = dictionary.findOrInsert(data_ptr, 0, 3, code);
-    ASSERT(result);
-    ASSERT_EQ(inserted_code, code);
+//     result = dictionary.findOrInsert(data_ptr, 0, 3, code);
+//     ASSERT(result);
+//     ASSERT_EQ(inserted_code, code);
 
-    result = dictionary.findOrInsert(data_ptr, 1, 2, code);
-    ASSERT(result);
-    ASSERT_EQ('b', code);
+//     result = dictionary.findOrInsert(data_ptr, 1, 2, code);
+//     ASSERT(result);
+//     ASSERT_EQ('b', code);
 
-    ASSERT_EQm("3 items should be added", size_before + 3, dictionary.size());
-    PASS();
-}
+//     ASSERT_EQm("3 items should be added", size_before + 3, dictionary.size());
+//     PASS();
+// }
 
-TEST dictionary_shoud_return_code_and_dont_add(void) {
-    EncoderDictionary dictionary;
+// TEST dictionary_shoud_return_code_and_dont_add(void) {
+//     EncoderDictionary dictionary;
 
-    const char* data_ptr = "zxzxczxcdzx";
-    uint32_t code;
-    bool result;
-    size_t size_before = dictionary.size();
+//     const char* data_ptr = "zxzxczxcdzx";
+//     uint32_t code;
+//     bool result;
+//     size_t size_before = dictionary.size();
 
-    result = dictionary.findOrInsert(data_ptr, 0, 1, code);
-    ASSERT_FALSE(result);
-    result = dictionary.findOrInsert(data_ptr, 0, 2, code);
-    ASSERT(result);
+//     result = dictionary.findOrInsert(data_ptr, 0, 1, code);
+//     ASSERT_FALSE(result);
+//     result = dictionary.findOrInsert(data_ptr, 0, 2, code);
+//     ASSERT(result);
 
-    result = dictionary.findOrInsert(data_ptr, 2, 1, code);
-    ASSERT_FALSE(result);
-    result = dictionary.findOrInsert(data_ptr, 2, 2, code);
-    ASSERT_FALSE(result);
-    result = dictionary.findOrInsert(data_ptr, 2, 3, code);
-    ASSERT(result);
+//     result = dictionary.findOrInsert(data_ptr, 2, 1, code);
+//     ASSERT_FALSE(result);
+//     result = dictionary.findOrInsert(data_ptr, 2, 2, code);
+//     ASSERT_FALSE(result);
+//     result = dictionary.findOrInsert(data_ptr, 2, 3, code);
+//     ASSERT(result);
 
-    result = dictionary.findOrInsert(data_ptr, 5, 1, code);
-    ASSERT_FALSE(result);
-    result = dictionary.findOrInsert(data_ptr, 5, 2, code);
-    ASSERT_FALSE(result);
-    result = dictionary.findOrInsert(data_ptr, 5, 3, code);
-    ASSERT_FALSE(result);
-    result = dictionary.findOrInsert(data_ptr, 5, 4, code);
-    ASSERT(result);
+//     result = dictionary.findOrInsert(data_ptr, 5, 1, code);
+//     ASSERT_FALSE(result);
+//     result = dictionary.findOrInsert(data_ptr, 5, 2, code);
+//     ASSERT_FALSE(result);
+//     result = dictionary.findOrInsert(data_ptr, 5, 3, code);
+//     ASSERT_FALSE(result);
+//     result = dictionary.findOrInsert(data_ptr, 5, 4, code);
+//     ASSERT(result);
 
-    ASSERT_EQm("3 items should be added", size_before + 3, dictionary.size());
+//     ASSERT_EQm("3 items should be added", size_before + 3, dictionary.size());
 
-    PASS();
-}
+//     PASS();
+// }
 
 TEST encode_seq1(void) {
     Encoder encoder;
@@ -281,12 +281,12 @@ TEST write_bits_test3(void) {
     PASS();
 }
 
-/* Suites can group multiple tests with common setup. */
-SUITE(DictionaryTests) {
-    RUN_TEST(dictionary_should_be_initialized);
-    RUN_TEST(dictionary_should_add_new_sequence);
-    RUN_TEST(dictionary_shoud_return_code_and_dont_add);
-}
+// /* Suites can group multiple tests with common setup. */
+// SUITE(DictionaryTests) {
+//     RUN_TEST(dictionary_should_be_initialized);
+//     RUN_TEST(dictionary_should_add_new_sequence);
+//     RUN_TEST(dictionary_shoud_return_code_and_dont_add);
+// }
 
 SUITE(EncoderTests) {
     RUN_TEST(encode_seq1);
@@ -325,7 +325,7 @@ int main(int argc, char **argv) {
     GREATEST_MAIN_BEGIN();      /* command-line options, initialization. */
 
     /* Tests can also be gathered into test suites. */
-    RUN_SUITE(DictionaryTests);
+    // RUN_SUITE(DictionaryTests);
     RUN_SUITE(EncoderTests);
     RUN_SUITE(DecoderTests);
     RUN_SUITE(FileManagerTests);
